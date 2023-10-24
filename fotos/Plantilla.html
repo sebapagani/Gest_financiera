@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -211,6 +211,130 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Este portafolio con aversión al riesgo moderada-baja, se agregó un 40% de ponderación al activo más riesgoso (con mayor beta). Se ponderó un 20% de CENCOSHOPP dado que se espera que no tendrá una profunda volatilidad Además, las mayores ponderaciones son para los activos que han tenido un mayor incremento de precio a lo largo del año, banco santander aproximadamente aumentó el valor de su acción en un 25%, enel un 35% y cencoshopp un 10%, los gráficos sobre la variación se muestran a continuación, donde en general desde el 2022, los precios han ido a la alta.&nbsp;Finalmente se ponderó un 40% de BSANTANDER para poder mitigar el riesgo, debido a que es una industria de bajo riesgo y posee el menor beta, por lo que si el mercado baja, esta no se verá tan afectada.</p>
 <p><img src="WhatsApp%20Image%202023-09-28%20at%2015.19.41.jpeg" class="img-fluid"><br>
 <img src="WhatsApp%20Image%202023-09-28%20at%2015.21.20.jpeg" class="img-fluid"><img src="WhatsApp%20Image%202023-09-28%20at%2015.22.21.jpeg" class="img-fluid"></p>
+</section>
+<section id="aplicación-black-scholes" class="level3">
+<h3 class="anchored" data-anchor-id="aplicación-black-scholes">Aplicación Black-Scholes</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantmod)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xts)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>black_scholes <span class="ot">&lt;-</span> <span class="cf">function</span>(S, K, t, r, sigma,tipo) {</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(tipo<span class="sc">==</span><span class="st">"call"</span>){</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    d1 <span class="ot">&lt;-</span> (<span class="fu">log</span>(S<span class="sc">/</span>K) <span class="sc">+</span> (r <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>) <span class="sc">*</span> t) <span class="sc">/</span> (sigma <span class="sc">*</span> <span class="fu">sqrt</span>(t))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    d2 <span class="ot">&lt;-</span> d1 <span class="sc">-</span> sigma <span class="sc">*</span> <span class="fu">sqrt</span>(t)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    N_d1 <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(d1)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    N_d2 <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(d2)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    precio_call <span class="ot">&lt;-</span> S <span class="sc">*</span> N_d1 <span class="sc">-</span> K <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>r <span class="sc">*</span> t) <span class="sc">*</span> N_d2</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(precio_call)}</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(tipo<span class="sc">==</span><span class="st">"put"</span>){</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    d1 <span class="ot">&lt;-</span> (<span class="fu">log</span>(S<span class="sc">/</span>K) <span class="sc">+</span> (r <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span>) <span class="sc">*</span> t) <span class="sc">/</span> (sigma <span class="sc">*</span> <span class="fu">sqrt</span>(t))</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    d2 <span class="ot">&lt;-</span> d1 <span class="sc">-</span> sigma <span class="sc">*</span> <span class="fu">sqrt</span>(t)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    value <span class="ot">&lt;-</span>  (K<span class="sc">*</span><span class="fu">exp</span>(<span class="sc">-</span>r<span class="sc">*</span>T)<span class="sc">*</span><span class="fu">pnorm</span>(<span class="sc">-</span>d2) <span class="sc">-</span> S<span class="sc">*</span><span class="fu">pnorm</span>(<span class="sc">-</span>d1))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(value)}</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>Activo<span class="ot">&lt;-</span> <span class="st">"CENCOSHOPP.SN"</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">getSymbols</span>(Activo, <span class="at">src =</span> <span class="st">"yahoo"</span>, <span class="at">from =</span> <span class="st">"2018-01-01"</span>, <span class="at">to =</span> <span class="st">"2023-10-16"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "CENCOSHOPP.SN"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>precios <span class="ot">&lt;-</span> <span class="fu">Cl</span>(<span class="fu">get</span>(Activo))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>rendimientos <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">log</span>(precios))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>sigma<span class="ot">&lt;-</span><span class="fu">sd</span>(rendimientos[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(rendimientos)])</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>volatilidad<span class="ot">&lt;-</span><span class="fu">var</span>(rendimientos[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(rendimientos)])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>S<span class="ot">&lt;-</span> <span class="dv">1344</span> <span class="co"># Precio de la acción a 16 de octubre</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>K<span class="ot">&lt;-</span> <span class="dv">1400</span> <span class="co"># Precio del ejercicio</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>R<span class="ot">&lt;-</span> <span class="fl">0.0642</span> <span class="co"># Tasa libre de riesgo (Bonos BCH a 10 años al 12 de oct)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span>sigma</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># Tiempo</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>precio_call <span class="ot">&lt;-</span> <span class="fu">black_scholes</span>(S, K, t, R, sigma,<span class="st">"call"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>precio_put <span class="ot">&lt;-</span> <span class="fu">black_scholes</span>(S, K, t, R, sigma,<span class="st">"put"</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"El precio de la opción call es:"</span>, precio_call))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "El precio de la opción call es: 35.0588970110755"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"El precio de la opción put es:"</span>, precio_put))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "El precio de la opción put es: 4.00328121661755"</code></pre>
+</div>
+</div>
+<p>Precio de la acción al 16 de Octubre</p>
+<p><img src="Captura%20de%20Pantalla%202023-10-16%20a%20la(s)%2022.15.03.png" class="img-fluid"></p>
+<p>Tasa libre del riesgo (Bono banco central)</p>
+<p><img src="Captura%20de%20Pantalla%202023-10-23%20a%20la(s)%2011.37.34.png" class="img-fluid"></p>
+</section>
+<section id="modelo-adicional-de-valorizacion" class="level3">
+<h3 class="anchored" data-anchor-id="modelo-adicional-de-valorizacion">Modelo Adicional de valorizacion</h3>
+<p>Ademas, del modelo de Black &amp; Scholes, existen distintos modelos sobre valorizar opciones tales como: árbol binomial, volatilidad implícita, opciones reales, modelo de Heston, modelo de Cox-Ingersoll-Ross, modelo de Merton, modelo de Ornstein-Uhlenbeck.</p>
+<p>Para efectos de este proyecto se utilizara el árbol binomial, este modelo fue desarollado por Cox, Ross y Rubinstein. El árbol binomial muestra las distintas posibilidades que puede tomar el valor de la acción en una cantidad de periodos.</p>
+<p>Para el caso de un periodo, se debe tener en cuenta el precio de la acción, y los posibles valores que puede tener dependiendo del estado de la naturaleza (up y down), para definir el modelo matematico, se denominan las siguientes notación</p>
+<p>S: Precio de la acción subyacente</p>
+<p>SU: Precio de la acción en un escenario alcista</p>
+<p>SD: Precio de la acción en un escenario bajista</p>
+<p>C: Precio de la opcion de compra (Valor de la acción que se acuerda)</p>
+<p>Cu, Cd: representa los valores de la opción en los distintos estados, en otras palabras, son las ganancias (si es perdida se considera como ganancia 0).</p>
+<p>El siguiente diagrama explica el modelo</p>
+<p><img src="Captura%20de%20Pantalla%202023-10-17%20a%20la(s)%2018.16.04.png" class="img-fluid"></p>
+<p>Fuente (Mascareñas,1994)</p>
+<p>En el diagramada de la izquierda 120 vendria siendo S*U (precio*retorno en estado up) y el 90 S*D (precio*retorno en estado down). Por otro lado, el de la derecha el 20 es la ganancia que se obtiene si se ejerce la opción en el estado alciste y 0 es cuando no se ejerce la opción (dado que esta en el escenario down)</p>
+<p>El valor de ratio de cobertura se obtiene igualando el flujo de caja al final del periodo optimista como pesimista en donde se obtiene</p>
+<p>H= (cu-cd)/S*(U-D)</p>
+<p>\[H = \frac{{cu - cd}}{{S \cdot (U - D)}}\]</p>
+<p>La probabilidad de ocurrencia del escenario positivo se modala como</p>
+<p>P=(1+Rf-D)/(U-D)</p>
+<p>Donde Rf es la tasa libre de riesgo</p>
+<p>Otra posible manera de calcular la probabilidad es</p>
+<p>P= e^(rΔt)-d/(U-D)</p>
+<p>Por otro lado, la probabilidad que ocurra el escenario negativo se modela como</p>
+<p>1-P=(U-(1+Rf))/(U-D)</p>
+<p>Finalmente, el valor de la opción de compra se calcula como</p>
+<p>C=(Cu*P+Cd(1-P))/1+Rf</p>
+<p>Cabe mencionar que este modelo se puede extender hasta n periodos, pero por simplicidad solo se probara para 1 periodo</p>
+<p>Julián Benavides, en su paper “EVALUACIÓN DE LA APLICACIÓN DE DOS MODELOS DE VALORACIÓN DE OPCIONES A LA ADMINISTRACIÓN DE PORTAFOLIOS” (2002) compara el modelo black and scholes con el binomial con relación al “portafolio insurence”</p>
+<p>Gastón Silverio, en su paper “Modelo binomial para la valoración de empresas y los efectos de la deuda: escudo fiscal y liquidación de la firma” (2014) propone un modelo para valorar empresas teniendo como base la teoria de opciones reales.</p>
+</section>
+<section id="aplicacion-modelo-adicional" class="level3">
+<h3 class="anchored" data-anchor-id="aplicacion-modelo-adicional">Aplicacion modelo adicional</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Función para valorar una opción europea de compra con un solo período</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>option_single_period_binomial_tree <span class="ot">&lt;-</span> <span class="cf">function</span>(S, K, rf, u, d){</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Probabilidad de subida</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">+</span>rf <span class="sc">-</span> d) <span class="sc">/</span> (u <span class="sc">-</span> d)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Precio del activo subyacente en el estado de subida y bajada</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  Su <span class="ot">&lt;-</span> S <span class="sc">*</span> u</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  Sd <span class="ot">&lt;-</span> S <span class="sc">*</span> d</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Valor de la opción en el estado de subida y bajada</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  Cu <span class="ot">&lt;-</span> <span class="fu">max</span>(Su <span class="sc">-</span> K, <span class="dv">0</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  Cd <span class="ot">&lt;-</span> <span class="fu">max</span>(Sd <span class="sc">-</span> K, <span class="dv">0</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calcula el precio de la opción</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  C <span class="ot">&lt;-</span> (Cu <span class="sc">*</span> p <span class="sc">+</span> Cd <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> rf)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(C)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Parámetros</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="dv">1344</span>    <span class="co"># Precio actual del activo subyacente</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">1400</span>    <span class="co"># Precio de ejercicio de la opción</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>rf <span class="ot">&lt;-</span> <span class="fl">0.0642</span>   <span class="co"># Tasa libre de riesgo</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fl">1.1</span>    <span class="co"># Factor de crecimiento</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fl">0.9</span>    <span class="co"># Factor de decaimiento</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcula el precio de la opción</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>precio_opción<span class="ot">&lt;-</span> <span class="fu">option_single_period_binomial_tree</span>(S, K, rf, u, d)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El precio de la opción europea de compra es:"</span>, precio_opción, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>El precio de la opción europea de compra es: 60.48337 </code></pre>
+</div>
+</div>
+</section>
+<section id="análisis-de-contraste-de-ambos-modelos" class="level3">
+<h3 class="anchored" data-anchor-id="análisis-de-contraste-de-ambos-modelos">Análisis de contraste de ambos modelos</h3>
+<p>Comparando los resultados, en Black and Scholes el precio de la opción es 35 pesos y con el modelo binomial 60 pesos.</p>
+<p>La principal diferencia es que el modelo binomial incluye la probabilidad de que el activo se encuentre en el estado up, y cuanto seria el retorno en ese caso. Por ejemplo, puede existir un 70% que la acción suba de precio, y su retorno va a ser 1.2 veces el precio original.</p>
+</section>
+<section id="reporte-grupal-caso-administración" class="level3">
+<h3 class="anchored" data-anchor-id="reporte-grupal-caso-administración">Reporte Grupal: Caso Administración</h3>
 </section>
 </section>
 
