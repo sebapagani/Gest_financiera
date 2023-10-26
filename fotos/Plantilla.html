@@ -69,6 +69,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="Plantilla_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="Plantilla_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -250,7 +252,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>S<span class="ot">&lt;-</span> <span class="dv">1344</span> <span class="co"># Precio de la acción a 16 de octubre</span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>K<span class="ot">&lt;-</span> <span class="dv">1300</span> <span class="co"># Precio del ejercicio</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>R<span class="ot">&lt;-</span> <span class="fl">0.0642</span> <span class="co"># Tasa libre de riesgo (Bonos BCH a 10 años al 12 de oct)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>R<span class="ot">&lt;-</span> <span class="fl">0.0695</span> <span class="co"># Tasa libre de riesgo (Bonos BCH a 2 años al 12 de oct)</span></span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span>sigma</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fl">0.2</span> <span class="co"># Tiempo</span></span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
@@ -258,11 +260,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>precio_put <span class="ot">&lt;-</span> <span class="fu">black_scholes</span>(S, K, t, R, sigma,<span class="st">"put"</span>)</span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"El precio de la opción call es:"</span>, precio_call))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "El precio de la opción call es: 60.585626188569"</code></pre>
+<pre><code>[1] "El precio de la opción call es: 61.9452230931663"</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"El precio de la opción put es:"</span>, precio_put))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "El precio de la opción put es: -0.00536630143787536"</code></pre>
+<pre><code>[1] "El precio de la opción put es: -0.00411359031250187"</code></pre>
 </div>
 </div>
 <p>Se considero en T=0,2 (en años) lo que equivale aproximadamente a 2 meses y medio.</p>
@@ -283,54 +285,63 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>SD: Precio de la acción en un escenario bajista</p>
 <p>C: Precio de la opcion de compra (Valor de la acción que se acuerda)</p>
 <p>Cu, Cd: representa los valores de la opción en los distintos estados, en otras palabras, son las ganancias (si es perdida se considera como ganancia 0).</p>
-<p>El siguiente diagrama explica el modelo</p>
+<p>El siguiente diagrama explica el modelo donde el precio de la accion en un tiempo t+1 tiene distintos posibles valores, y por ende distintas ganancias.</p>
 <p><img src="Captura%20de%20Pantalla%202023-10-17%20a%20la(s)%2018.16.04.png" class="img-fluid"></p>
 <p>Fuente (Mascareñas,1994)</p>
 <p>En el diagrama de la izquierda 120 vendria siendo S*U (precio*retorno en estado up) y el 90 S*D (precio*retorno en estado down). Por otro lado, el de la derecha el 20 es la ganancia que se obtiene si se ejerce la opción en el estado alciste y 0 es cuando no se ejerce la opción (dado que esta en el escenario down)</p>
 <p>El valor de ratio de cobertura se obtiene igualando el flujo de caja al final del periodo optimista como pesimista en donde se obtiene</p>
-<p>H= (cu-cd)/S*(U-D)</p>
+<p><span class="math display">\[
+H= \frac{cu-cd}{S*(U-D)}
+\]</span></p>
 <p>La probabilidad de ocurrencia del escenario positivo se modala como</p>
-<p>P=(1+Rf-D)/(U-D)</p>
+<p><span class="math display">\[
+P=\frac{1+{R_f}-D}{U-D}
+\]</span></p>
 <p>Donde Rf es la tasa libre de riesgo</p>
 <p>Otra posible manera de calcular la probabilidad es</p>
-<p>P= e^(rΔt)-d/(U-D)</p>
+<p><span class="math display">\[
+P = \frac{e^{r\Delta t} - D}{U - D}
+\]</span></p>
 <p>Por otro lado, la probabilidad que ocurra el escenario negativo se modela como</p>
-<p>1-P=(U-(1+Rf))/(U-D)</p>
+<p><span class="math display">\[
+1 - P = \frac{U - (1 + R_f)}{U - D}
+\]</span></p>
 <p>Finalmente, el valor de la opción de compra se calcula como</p>
-<p>C=(Cu*P+Cd(1-P))/1+Rf</p>
-<p>Cabe mencionar que este modelo se puede extender hasta n periodos, pero por simplicidad solo se usara para 1 periodo</p>
+<p><span class="math display">\[
+C = \frac{{C_u \cdot P + C_d \cdot (1 - P)}}{{1 + R_f}}
+\]</span></p>
+<p>Cabe mencionar que este modelo se puede extender hasta n periodos, pero por simplicidad solo se usara para 1 periodo.</p>
 <p>Julián Benavides, en su paper “EVALUACIÓN DE LA APLICACIÓN DE DOS MODELOS DE VALORACIÓN DE OPCIONES A LA ADMINISTRACIÓN DE PORTAFOLIOS” (2002) compara el modelo black and scholes con el binomial con relación al “portafolio insurence”</p>
-<p>Gastón Silverio, en su paper “Modelo binomial para la valoración de empresas y los efectos de la deuda: escudo fiscal y liquidación de la firma” (2014) propone un modelo para valorar empresas teniendo como base la teoria de opciones reales.</p>
+<p>Gastón Silverio, en su paper “Modelo binomial para la valoración de empresas y los efectos de la deuda: escudo fiscal y liquidación de la firma” (2014) propone un modelo para valorar empresas teniendo como base la teoría de opciones reales.</p>
+<p>Por ultimo, Ahmad y Anuradha en su Paper “Comparison: Binomial model and Black Scholes model”( 2018) en donde tratan de demostrar que sus resultados son aproximadamentes iguales usando el estadistico t y el metodo Turkey.<br>
+</p>
 </section>
-<section id="aplicacion-modelo-adicional" class="level3">
-<h3 class="anchored" data-anchor-id="aplicacion-modelo-adicional">Aplicacion modelo adicional</h3>
+<section id="aplicación-modelo-adicional" class="level3">
+<h3 class="anchored" data-anchor-id="aplicación-modelo-adicional">Aplicación modelo adicional</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Función para valorar una opción europea de compra con un solo período</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>option_single_period_binomial_tree <span class="ot">&lt;-</span> <span class="cf">function</span>(S, K, rf, u, d){</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Probabilidad de subida</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">+</span>rf <span class="sc">-</span> d) <span class="sc">/</span> (u <span class="sc">-</span> d)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Precio del activo subyacente en el estado de subida y bajada</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  Su <span class="ot">&lt;-</span> S <span class="sc">*</span> u</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  Sd <span class="ot">&lt;-</span> S <span class="sc">*</span> d</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Valor de la opción en el estado de subida y bajada</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  Cu <span class="ot">&lt;-</span> <span class="fu">max</span>(Su <span class="sc">-</span> K, <span class="dv">0</span>)</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  Cd <span class="ot">&lt;-</span> <span class="fu">max</span>(Sd <span class="sc">-</span> K, <span class="dv">0</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calcula el precio de la opción</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  C <span class="ot">&lt;-</span> (Cu <span class="sc">*</span> p <span class="sc">+</span> Cd <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> rf)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(C)</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Parámetros</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="dv">1344</span>    <span class="co"># Precio actual del activo subyacente</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">1300</span>    <span class="co"># Precio de ejercicio de la opción</span></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>rf <span class="ot">&lt;-</span> <span class="fl">0.0642</span>   <span class="co"># Tasa libre de riesgo</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fl">1.1</span>    <span class="co"># Factor de crecimiento</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fl">0.9</span>    <span class="co"># Factor de decaimiento</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  Su <span class="ot">&lt;-</span> S <span class="sc">*</span> u <span class="co">#Precio de la acción en estado U</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  Sd <span class="ot">&lt;-</span> S <span class="sc">*</span> d <span class="co">#Precio de la acción en estado D</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  Cu <span class="ot">&lt;-</span> <span class="fu">max</span>(Su <span class="sc">-</span> K, <span class="dv">0</span>) <span class="co">#Valor opcion en U</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  Cd <span class="ot">&lt;-</span> <span class="fu">max</span>(Sd <span class="sc">-</span> K, <span class="dv">0</span>) <span class="co">#Valor opcion en D</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  C <span class="ot">&lt;-</span> (Cu <span class="sc">*</span> p <span class="sc">+</span> Cd <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> rf)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(C)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Parámetros</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>S <span class="ot">&lt;-</span> <span class="dv">1344</span>    <span class="co"># Precio actual del activo subyacente</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">1300</span>    <span class="co"># Precio de ejercicio de la opción</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>rf <span class="ot">&lt;-</span> <span class="fl">0.0642</span>   <span class="co"># Tasa libre de riesgo</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fl">1.1</span>    <span class="co"># Factor de crecimiento</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fl">0.9</span>    <span class="co"># Factor de decaimiento</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcula el precio de la opción</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>precio_opción<span class="ot">&lt;-</span> <span class="fu">option_single_period_binomial_tree</span>(S, K, rf, u, d)</span>
 <span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcula el precio de la opción</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>precio_opción<span class="ot">&lt;-</span> <span class="fu">option_single_period_binomial_tree</span>(S, K, rf, u, d)</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El precio de la opción europea de compra es:"</span>, precio_opción, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"El precio de la opción europea de compra es:"</span>, precio_opción, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>El precio de la opción europea de compra es: 137.6305 </code></pre>
 </div>
@@ -338,17 +349,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="análisis-de-contraste-de-ambos-modelos" class="level3">
 <h3 class="anchored" data-anchor-id="análisis-de-contraste-de-ambos-modelos">Análisis de contraste de ambos modelos</h3>
-<p>Comparando los resultados, en Black and Scholes el precio de la opción es 60 pesos y con el modelo binomial 137 pesos. Sin embargo, cuando en black and scholes se considera tiempo como 1 año, y en el modelo binomial Su como 1.1 y Sd como 0.9 los resultados son parecidos, dando como resultado 124 pesos en black and sholes y 137 en el arbol binomial.</p>
-<p>La principal diferencia es que el modelo binomial incluye la probabilidad de que el activo se encuentre en el estado up, y cuanto seria el retorno en ese caso. Por ejemplo, puede existir un 70% que la acción suba de precio, y su retorno va a ser 1.2 veces el precio original.</p>
-<p>Modelo Black &amp; Scholes considera tiempo</p>
-<p>Modelo binomial considera la probabilidad y rentabilidad en los distintos escenarios, lo cual es util</p>
+<p>Comparando los resultados, en Black and Scholes el precio de la opción es 61.94 pesos y con el modelo binomial 137,6 pesos. Sin embargo, cuando en black and scholes se considera tiempo como 1 año, y en el modelo binomial <span class="math inline">\(S_u\)</span> como 1.1 y <span class="math inline">\(S_d\)</span> como 0.9 los resultados son parecidos, dando como resultado 124 pesos en black and sholes y 137 en el árbol binomial.</p>
+<p>La principal diferencia es que el modelo binomial incluye la probabilidad de que el activo se encuentre en el estado up, y cuanto seria el retorno en ese caso. Por ejemplo, puede existir un 70% que la acción suba de precio, y su retorno va a ser 1.2 veces el precio original. Por lo tanto, este modelo considera la probabilidad y rentabilidad de distintos escenario lo que permite calcular el valor de la opción cuando existe incertidumbre.</p>
+<p>Modelo Black &amp; Scholes considera tiempo como variable en el modelo lo cual permite analizar en tiempo continuo el valor de la acción, el método binomial es para tiempos discretos.</p>
+<p>Otra diferencias entre Black and Scholes y el modelo binomial es que el primero requiere una solución de ecuación diferencial estocástica mientras que el modelo binomial es un método estadístico (Ahmad, 2018)</p>
 </section>
 <section id="reporte-grupal-caso-administración" class="level3">
 <h3 class="anchored" data-anchor-id="reporte-grupal-caso-administración">Reporte Grupal: Caso Administración</h3>
-<p>De los tres casos presentados se decidio replicar “Política de crédito de Braam Industries” para el activo Banco Santander</p>
-<p>Primero, para determinar las ventas anuales se considero la cantidad de activos que tenía el Banco, cual fue obtenido en el siguiente link https://banco.santander.cl/uploads/000/040/799/ca92bae1-dde8-4eef-b791-c5b9dcb4d51d/original/Santander_Memoria_2022_vf.pdf</p>
+<p>De los tres casos presentados se decidió replicar “Política de crédito de Braam Industries” para el activo Banco Santander</p>
+<p>Primero, para determinar las ventas anuales se considero la cantidad de activos que tenía el Banco, cual fue obtenido en el siguiente link <a href="https://banco.santander.cl/uploads/000/040/799/ca92bae1-dde8-4eef-b791-c5b9dcb4d51d/original/Santander_Memoria_2022_vf.pdf" class="uri">https://banco.santander.cl/uploads/000/040/799/ca92bae1-dde8-4eef-b791-c5b9dcb4d51d/original/Santander_Memoria_2022_vf.pdf</a></p>
 <p><img src="Imagen%201.png" class="img-fluid" width="244"></p>
-<p>Los bancos conmunmente no tienen una tasa de incumplimiento, por ende, se considero la tasa de morosidad. Los bancos hacen una diferenciación dependiendo del tipo de cliente</p>
+<p>Los bancos comúnmente no tienen una tasa de incumplimiento, por ende, se consideró la tasa de morosidad. Los bancos hacen una diferenciación dependiendo del tipo de cliente.</p>
+<p>La siguiente tabla fue obtenida en&nbsp; https://banco.santander.cl/uploads/000/041/232/734f33e3-5145-4671-ae8b-7c592b1fb6fd/original/Management_commentary_032023.PDF</p>
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
 <p><img src="Imagen%202.png" class="img-fluid figure-img"></p>
@@ -359,7 +371,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="Imagen%203.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
-<p>Sin embargo, la CMF publicó la morosidad a 90 dias y se consideró el valor de 2,17% que pertence al total.</p>
+<p>Sin embargo, la CMF publicó la morosidad a 90 días donde no separa por los distintos tipos de deudores. Para efectos de este trabajo se consideró el valor de 2,17% que pertenece al total. El periodo de cuentas por cobrar se consideró 90 días. Para los costos administrativos se considerará el total de los gastos operacionales y este se dividió por la cantidad de activos y se multiplicó por 100 para tener el porcentaje.</p>
+<p>Para definir la tasa de interés se consideró la TPM actual la cual actualmente es de 9,5% anual, lo que equivale a 0,024867% interés diario. Por último, se consideró que los costos variables corresponden al 45% de las ventas anuales.</p>
+<p>La empresa debe decidir qué política de crédito utilizar, para esto se compara la situación actual con tres posibles escenarios hipotéticos.</p>
+<p>Para esto se calcularon las ventas diarias, costos variables diarios, incumplimiento diario (en pesos), costos administrativos diarios y la tasa de interés que se debe descontar el flujo considerando la tasa de interés diaria y el periodo de cuentas por cobrar.</p>
+<p>Con estos datos se calculó el VPN para los 4 casos obteniendo que el periodo actual tiene la mejor política de crédito. Los resultados se muestran a continuación.</p>
+<p><br>
+<img src="Captura%20de%20Pantalla%202023-10-26%20a%20la(s)%2016.14.40.png" class="img-fluid"></p>
 </section>
 </section>
 
