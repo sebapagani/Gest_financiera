@@ -221,13 +221,16 @@ getSymbols(Activo, src = "yahoo", from = "2018-01-01", to = "2023-10-16")
 precios <- Cl(get(Activo))
 rendimientos <- diff(log(precios))
 sigma<-sd(rendimientos[2:length(rendimientos)])
+print(sigma)
 volatilidad<-var(rendimientos[2:length(rendimientos)])
+#retornos<-dailyReturn(precios)
+#sigma2<-sd(retornos,na.rm=TRUE)
 
 S<- 1344 # Precio de la acción a 16 de octubre
-K<- 1400 # Precio del ejercicio
+K<- 1300 # Precio del ejercicio
 R<- 0.0642 # Tasa libre de riesgo (Bonos BCH a 10 años al 12 de oct)
 sigma <-sigma
-t <- 1 # Tiempo
+t <- 0.2 # Tiempo
 
 precio_call <- black_scholes(S, K, t, R, sigma,"call")
 precio_put <- black_scholes(S, K, t, R, sigma,"put")
@@ -235,13 +238,19 @@ print(paste("El precio de la opción call es:", precio_call))
 print(paste("El precio de la opción put es:", precio_put))
 ```
 
+Se considero en T=0,2 (en años) lo que equivale aproximadamente a 2 meses y medio.
+
 Precio de la acción al 16 de Octubre
 
 ![](Captura%20de%20Pantalla%202023-10-16%20a%20la(s)%2022.15.03.png)
 
+Fuente: Yahoo Finance
+
 Tasa libre del riesgo (Bono banco central)
 
 ![](Captura%20de%20Pantalla%202023-10-23%20a%20la(s)%2011.37.34.png)
+
+Fuente: Banco Central
 
 ### Modelo Adicional de valorizacion
 
@@ -267,31 +276,41 @@ El siguiente diagrama explica el modelo
 
 Fuente (Mascareñas,1994)
 
-En el diagramada de la izquierda 120 vendria siendo S\*U (precio\*retorno en estado up) y el 90 S\*D (precio\*retorno en estado down). Por otro lado, el de la derecha el 20 es la ganancia que se obtiene si se ejerce la opción en el estado alciste y 0 es cuando no se ejerce la opción (dado que esta en el escenario down)
+En el diagrama de la izquierda 120 vendria siendo S\*U (precio\*retorno en estado up) y el 90 S\*D (precio\*retorno en estado down). Por otro lado, el de la derecha el 20 es la ganancia que se obtiene si se ejerce la opción en el estado alciste y 0 es cuando no se ejerce la opción (dado que esta en el escenario down)
 
 El valor de ratio de cobertura se obtiene igualando el flujo de caja al final del periodo optimista como pesimista en donde se obtiene
 
-H= (cu-cd)/S\*(U-D)
+$$
+H= \frac{cu-cd}{S*(U-D)}
+$$
 
 La probabilidad de ocurrencia del escenario positivo se modala como
 
-P=(1+Rf-D)/(U-D)
+$$
+P=\frac{1+Rf-D}{U-D}
+$$
 
 Donde Rf es la tasa libre de riesgo
 
 Otra posible manera de calcular la probabilidad es
 
-P= e\^(rΔt)-d/(U-D)
+$$
+P = \frac{e^{r\Delta t} - d}{U - D}
+$$
 
 Por otro lado, la probabilidad que ocurra el escenario negativo se modela como
 
-1-P=(U-(1+Rf))/(U-D)
+$$
+1 - P = \frac{U - (1 + R_f)}{U - D}
+$$
 
 Finalmente, el valor de la opción de compra se calcula como
 
-C=(Cu\*P+Cd(1-P))/1+Rf
+$$
+C = \frac{{C_u \cdot P + C_d \cdot (1 - P)}}{{1 + R_f}}
+$$
 
-Cabe mencionar que este modelo se puede extender hasta n periodos, pero por simplicidad solo se probara para 1 periodo
+Cabe mencionar que este modelo se puede extender hasta n periodos, pero por simplicidad solo se usara para 1 periodo
 
 Julián Benavides, en su paper "EVALUACIÓN DE LA APLICACIÓN DE DOS MODELOS DE VALORACIÓN DE OPCIONES A LA ADMINISTRACIÓN DE PORTAFOLIOS" (2002) compara el modelo black and scholes con el binomial con relación al "portafolio insurence"
 
@@ -317,7 +336,7 @@ option_single_period_binomial_tree <- function(S, K, rf, u, d){
 
 # Parámetros
 S <- 1344    # Precio actual del activo subyacente
-K <- 1400    # Precio de ejercicio de la opción
+K <- 1300    # Precio de ejercicio de la opción
 rf <- 0.0642   # Tasa libre de riesgo
 u <- 1.1    # Factor de crecimiento
 d <- 0.9    # Factor de decaimiento
@@ -331,8 +350,36 @@ cat("El precio de la opción europea de compra es:", precio_opción, "\n")
 
 ### Análisis de contraste de ambos modelos
 
-Comparando los resultados, en Black and Scholes el precio de la opción es 35 pesos y con el modelo binomial 60 pesos.
+Comparando los resultados, en Black and Scholes el precio de la opción es 60 pesos y con el modelo binomial 137 pesos. Sin embargo, cuando en black and scholes se considera tiempo como 1 año, y en el modelo binomial Su como 1.1 y Sd como 0.9 los resultados son parecidos, dando como resultado 124 pesos en black and sholes y 137 en el arbol binomial.
 
 La principal diferencia es que el modelo binomial incluye la probabilidad de que el activo se encuentre en el estado up, y cuanto seria el retorno en ese caso. Por ejemplo, puede existir un 70% que la acción suba de precio, y su retorno va a ser 1.2 veces el precio original.
 
+Modelo Black & Scholes considera tiempo lo cual permite analizar
+
+Modelo binomial considera la probabilidad y rentabilidad en los distintos escenarios, lo cual es util ya que al saber de antam
+
+Otra diferencias entre Black and Scholes y el modelo binomial es que el primero requiere una solución de ecuación diferencial estocastica mientras que el modelo binomial es un metodo estadistico (Ahmad, 2018)
+
+black shcoles solo europeo
+
+binomial deja americana
+
 ### Reporte Grupal: Caso Administración
+
+De los tres casos presentados se decidio replicar "Política de crédito de Braam Industries" para el activo Banco Santander
+
+Primero, para determinar las ventas anuales se considero la cantidad de activos que tenía el Banco, cual fue obtenido en el siguiente link https://banco.santander.cl/uploads/000/040/799/ca92bae1-dde8-4eef-b791-c5b9dcb4d51d/original/Santander_Memoria_2022_vf.pdf
+
+![](Imagen%201.png){width="244"}
+
+Los bancos conmunmente no tienen una tasa de incumplimiento, por ende, se considero la tasa de morosidad. Los bancos hacen una diferenciación dependiendo del tipo de cliente.
+
+La siguiente tabla fue obtenida en https://banco.santander.cl/uploads/000/041/232/734f33e3-5145-4671-ae8b-7c592b1fb6fd/original/Management_commentary_032023.PDF
+
+![](Imagen%202.png){fig-align="left"}
+
+![](Imagen%203.png){fig-align="right"}
+
+Sin embargo, la CMF publicó la morosidad a 90 dias donde no separa por los distintos tipos de deudores. Para efectos de este trabajo se consideró el valor de 2,17% que pertence al total. El periodo de cuentas por cobrar se considero 90 dias. Para los costos administrativos se consideraro el total de los gastos operacionales y este se dividio por la cantidad de activos y se multiplico por 100 para tener el porcentaje.
+
+La tasa de interes anual actualmente es 9,5%, lo que equivale a 0,024867% interes diario.
