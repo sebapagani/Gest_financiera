@@ -377,7 +377,7 @@ Sin embargo, la CMF publicó la morosidad a 90 días donde no separa por los dis
 
 Para definir la tasa de interés se consideró la TPM actual la cual actualmente es de 9,5% anual, lo que equivale a 0,024867% interés diario. Por último, se consideró que los costos variables corresponden al 45% de las ventas anuales.
 
-La empresa debe decidir qué política de crédito utilizar, para esto se compara la situación actual con tres posibles escenarios hipotéticos.
+La empresa debe decidir qué política de crédito utilizar, para esto se compara la situación actual con tres posibles escenarios hipotéticos,, los cuales serían la opción 1, opción 2 y opción 3. Cada escenario tiene distintos valores de ventas, costos y tasas para así analizar qué política de crédito debe adoptar la empresa.
 
 Para esto se calcularon las ventas diarias, costos variables diarios, incumplimiento diario (en pesos), costos administrativos diarios y la tasa de interés que se debe descontar el flujo considerando la tasa de interés diaria y el periodo de cuentas por cobrar.
 
@@ -386,4 +386,4 @@ Con estos datos se calculó el VPN para los 4 casos obteniendo que el periodo ac
 \
 ![](Captura de Pantalla 2023-10-26 a la(s) 16.14.40.png)
 
-Con respecto a la segunda pregunta, esta se omitió dado que la afirmación del enunciado es erronea, tanto en el ejemplo propuesto en el libro como en del trabajo presentado, las tasas de incumplimiento y costos administrativos en el caso 3 son mayores que el caso 2.
+Con respecto a la segunda pregunta, esta se omitió dado que la afirmación del enunciado es errónea, tanto en el ejemplo propuesto en el libro como en del trabajo presentado, las tasas de incumplimiento y costos administrativos en el caso 3 son mayores que el caso 2.
